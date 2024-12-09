@@ -9,4 +9,12 @@
     <string name="age">Age</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="history_icon" />
+    <string name="history">History</string>
+    <string name="schedule_icon" />
+    <string name="schedule">Schedule</string>
+    <string name="enter_your_age">Enter your age</string>
+    <string name="enter_your_name">Enter your Name</string>
+    <string name="enter_your_email">Enter your Email</string>
+    <string name="enter_your_password">Enter your password</string>
 </resources>
