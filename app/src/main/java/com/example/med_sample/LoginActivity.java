@@ -3,6 +3,7 @@ package com.example.med_sample;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -29,6 +30,15 @@ public class LoginActivity extends AppCompatActivity {
 
         inputEmail = findViewById(R.id.inputUsername); // Username field reused for email
         inputPassword = findViewById(R.id.inputPassword);
+        CheckBox showPassword = findViewById(R.id.showPassword);
+
+        showPassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                inputPassword.setInputType(1);
+            } else {
+                inputPassword.setInputType(129);
+            }
+        });
 
         View createAccountBtn = findViewById(R.id.textViewCreateAccount);
         createAccountBtn.setOnClickListener(v -> {
