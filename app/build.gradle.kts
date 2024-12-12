@@ -1,5 +1,4 @@
 plugins {
-
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
 }
@@ -27,27 +26,34 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    // Customizing the APK name
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            val newName = "MedRead-${variant.name}.apk"
+            (output as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = newName
+            true // Ensure the lambda returns a Boolean value
+        }
     }
 }
 
 dependencies {
     implementation(libs.firebase.auth)
-    dependencies {
-        implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-        implementation("com.google.firebase:firebase-auth")
-        implementation("com.google.firebase:firebase-database")
-        implementation("com.google.firebase:firebase-firestore") // Add this line
-        implementation("com.google.firebase:firebase-analytics")
-        implementation(libs.appcompat)
-        implementation(libs.material)
-        implementation(libs.activity)
-        implementation(libs.constraintlayout)
-        testImplementation(libs.junit)
-        androidTestImplementation(libs.ext.junit)
-        androidTestImplementation(libs.espresso.core)
-    }
-
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.activity)
+    implementation(libs.constraintlayout)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }
