@@ -1,5 +1,6 @@
 package com.example.med_sample.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import com.example.med_sample.HistoryActivity;
 import com.example.med_sample.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,6 +22,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class profile extends Fragment {
 
+    public profile() {
+    }
     private TextView userNameTextView;
     private TextView userEmailTextView;
 
@@ -31,6 +36,13 @@ public class profile extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
+        // Dynamically add headerFragment( the header!)
+        Fragment headerFragment = new headerFragment();
+        FragmentManager fragmentManager = getChildFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.header_container, headerFragment)
+                .commit();
+
         userNameTextView = view.findViewById(R.id.name_profile);
         userEmailTextView = view.findViewById(R.id.name_email);
 
@@ -40,6 +52,13 @@ public class profile extends Fragment {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             String userId = currentUser.getUid();
+
+            // Handle click listener for history LinearLayout
+            View historyLayout = view.findViewById(R.id.linearLayout_history);
+            historyLayout.setOnClickListener(v -> {
+                Intent intent = new Intent(getActivity(), HistoryActivity.class);
+                startActivity(intent);
+            });
 
             db.collection("users").document(userId)
                     .get()
