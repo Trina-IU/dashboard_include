@@ -2,12 +2,12 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="app">
+      <SelectionState runConfigName="Unnamed">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-12-12T17:29:03.254313100Z">
+        <DropdownSelection timestamp="2024-12-12T18:19:51.379034800Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\U S E R - N I T R O\.android\avd\Oppo_A94_API_33.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=e8717212" />
             </handle>
           </Target>
         </DropdownSelection>
