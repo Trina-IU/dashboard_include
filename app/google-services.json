@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "318664776466",
+    "project_id": "medreadapp-b9fc3",
+    "storage_bucket": "medreadapp-b9fc3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:318664776466:android:e072ebefdbf781461671cb",
+        "android_client_info": {
+          "package_name": "com.example.med_sample"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhaji7kyepW82Hinn_9Yx3k7z28uF_wGM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
