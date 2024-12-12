@@ -99,7 +99,7 @@ public class Dashboard_main extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-            //the iamge capture is send to DisplayScanned
+            //the image capture is sent to DisplayScanned
             Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
             Intent intent = new Intent(Dashboard_main.this, DisplayScanned.class);
             intent.putExtra("capturedImage", capturedImage); // Pass the image as a Bitmap
