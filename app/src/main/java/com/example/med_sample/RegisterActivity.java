@@ -69,5 +69,9 @@ public class RegisterActivity extends AppCompatActivity {
                         }
                     });
         });
+        View loginBtn = findViewById(R.id.AlreadyHaveAnAccount);
+        loginBtn.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+        });
     }
 }
