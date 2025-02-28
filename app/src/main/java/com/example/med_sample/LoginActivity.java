@@ -3,6 +3,7 @@ package com.example.med_sample;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -40,6 +41,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        inputPassword.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE){
+                findViewById(R.id.btnLogin).performClick();
+            }
+            return true;
+        });
+
         View createAccountBtn = findViewById(R.id.textViewCreateAccount);
         createAccountBtn.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
@@ -61,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, Dashboard_main.class));  // Navigate to Dashboard
                             finish();
-                        } else {
+                        }else {
                             Toast.makeText(LoginActivity.this, "Login Failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
