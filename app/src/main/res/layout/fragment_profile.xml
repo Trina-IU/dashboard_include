@@ -23,14 +23,14 @@
         android:layout_marginStart="30dp"
         android:layout_marginTop="216dp"
         android:layout_marginEnd="30dp"
-        android:textSize="15sp"
-        android:labelFor="@id/name_profile"
         android:background="@drawable/bg_profileinput"
         android:inputType="text"
+        android:labelFor="@id/name_profile"
         android:minHeight="48dp"
         android:padding="11dp"
         android:paddingTop="10dp"
         android:textColor="@color/black"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,12 +41,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="30dp"
         android:autofillHints="birthDateDay"
-        android:labelFor="@id/name_age"
         android:background="@drawable/bg_profileinput"
         android:inputType="number"
+        android:labelFor="@id/name_age"
         android:minHeight="48dp"
         android:padding="11dp"
         android:paddingTop="10dp"
@@ -99,18 +99,19 @@
     <TextView
         android:id="@+id/textview_name"
         android:layout_width="wrap_content"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="8dp"
         android:text="@string/name"
         android:textColor="#0B0B0B"
-        android:textSize="16sp"
+        android:textSize="15sp"
         app:layout_constraintBottom_toTopOf="@+id/name_profile"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.154"
+        app:layout_constraintHorizontal_bias="0.126"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.805" />
+        app:layout_constraintVertical_bias="1.0" />
+
 
     <TextView
         android:id="@+id/textview_age"
@@ -122,16 +123,15 @@
         android:textColor="#0B0B0B"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.134"
+        app:layout_constraintHorizontal_bias="0.103"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name_profile" />
-
 
     <TextView
         android:id="@+id/textview_email"
         android:layout_width="wrap_content"
-        android:layout_height="19dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="10dp"
         android:text="@string/email"
         android:textColor="#0B0B0B"
@@ -144,14 +144,14 @@
     <TextView
         android:id="@+id/textview_password"
         android:layout_width="wrap_content"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="0sp"
         android:layout_marginEnd="10dp"
         android:text="@string/current_password"
         android:textColor="#0B0B0B"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.233"
+        app:layout_constraintHorizontal_bias="0.189"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name_email" />
 
