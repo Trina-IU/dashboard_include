@@ -75,6 +75,7 @@
         android:layout_height="36dp"
         android:layout_marginTop="20dp"
         android:text="Show Password"
+        android:textSize="11sp"
         app:layout_constraintEnd_toEndOf="@+id/inputPassword"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/inputPassword"
@@ -101,7 +102,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/forgot_password"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="@+id/inputPassword"
         app:layout_constraintTop_toBottomOf="@+id/inputPassword" />
 
@@ -121,6 +122,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dont have an Account?"
+            android:textSize="12sp"
             android:textColor="@color/white"/>
 
         <TextView
@@ -128,6 +130,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=" Create an Account"
+            android:textSize="12sp"
             android:textColor="#EAC6B7" />
 
 
