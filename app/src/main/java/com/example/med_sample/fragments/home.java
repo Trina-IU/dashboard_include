@@ -39,8 +39,6 @@ public class home extends Fragment {
             Intent intent = new Intent(getActivity(), HistoryActivity.class);
             startActivity(intent);
         });
-
-
         return view;
     }
 }

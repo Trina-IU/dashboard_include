@@ -7,6 +7,16 @@
     android:background="@color/bg_mainblue"
     tools:context=".DisplayScanned">
 
+    <TextView
+        android:id="@+id/result_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="34dp"
+        android:layout_marginBottom="55dp"
+        android:text="Result"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/saveButton" />
+
     <ImageView
         android:id="@+id/capturedImageView"
         android:layout_width="0dp"

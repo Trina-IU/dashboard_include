@@ -43,8 +43,8 @@ android {
 }
 
 dependencies {
-    //TessTwo OCR(Handwriting recognition)
-    implementation("com.rmtheis:tess-two:9.1.0")
+    //ML Kit OCR(Handwriting recognition)
+    implementation("com.google.mlkit:text-recognition:16.0.1")
     //CameraX for camera integration
     implementation ("androidx.camera:camera-core:1.2.3")
     implementation ("androidx.camera:camera-camera2:1.2.3")
@@ -54,6 +54,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.mlkit:text-recognition:16.0.1")
