@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scrollable_text">This is a long text that will be scrollable inside the box.
+Add more lines here to see scrolling in action.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Vestibulum non ligula eros. Nullam eget ligula nisi.fsfsd
+        fsdffsdfdfsfsdfsdfsdfgsdfsdfsdfsfsdfsdfsdf
+    zvzxvdvsdfsdfsfsdfsdfsdfsdfsdfsdfsdfsdfsdfsdf
+    drtertetwetwetewtwetetwetwetwtwete
+    ertwetertertertertertertertertertertet</string>
+
+</resources>
