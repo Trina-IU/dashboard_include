@@ -3,6 +3,7 @@ package com.example.med_sample;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,15 @@ public class NotificationActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnItemSelectedListener(BottomNavigationUtil.getNavListener(this));
+
+        LinearLayout notification = findViewById(R.id.header_layout_nofication_back);
+        notification.setOnClickListener(v -> {
+            Intent intent = new Intent(NotificationActivity.this, Dashboard_main.class);
+            intent.putExtra("navigate_to", "home");
+            startActivity(intent);
+            finish();
+        });
+
     }
 
     @Override

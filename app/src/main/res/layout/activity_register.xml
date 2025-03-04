@@ -36,6 +36,7 @@
         android:ems="10"
         android:hint="Enter a surname"
         android:textColorHint="#808080"
+        android:textColor="@color/black"
         android:inputType="text"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
@@ -56,8 +57,9 @@
         android:drawableLeft="@drawable/emailbg"
         android:drawablePadding="10dp"
         android:ems="10"
-        android:hint="Enter your Emailtr"
+        android:hint="Enter your Email"
         android:textColorHint="#808080"
+        android:textColor="@color/black"
         android:inputType="text"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
@@ -79,6 +81,7 @@
         android:ems="10"
         android:hint="Enter your password"
         android:textColorHint="#808080"
+        android:textColor="@color/black"
         android:inputType="textPassword"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
@@ -118,6 +121,7 @@
         android:id="@+id/tAlreadyHaveAnAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text=" Login"
         android:textColor="#EAC6B7"
         android:textSize="14sp"
@@ -126,5 +130,5 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/AlreadyHaveAnAccount"
         app:layout_constraintTop_toBottomOf="@+id/btnLogin"
-        app:layout_constraintVertical_bias="0.094" />
+        app:layout_constraintVertical_bias="0.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

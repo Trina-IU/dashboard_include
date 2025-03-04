@@ -7,38 +7,50 @@
     android:background="@color/bg_mainblue"
     tools:context=".HistoryActivity">
 
-    <TextView
-        android:id="@+id/dashboard_Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="156dp"
-        android:shadowColor="#40000000"
-        android:shadowDx="6"
-        android:shadowDy="6"
-        android:shadowRadius="1.5"
-        android:text="@string/notification"
-        android:textColor="@color/orange"
-        android:textSize="35sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <FrameLayout
-        android:id="@+id/header_container"
+    <LinearLayout
+        android:id="@+id/header_layout_nofication_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@color/bg_mainblue"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/backtodashboard_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_arrow_back"
+            android:layout_marginEnd="16dp"/>
+
+        <TextView
+            android:id="@+id/notificationtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/notification"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/orange"
+            android:textStyle="bold"
+            android:textSize="28sp" />
+    </LinearLayout>
+
+    <!-- Scrollable Content -->
+
+    <!-- Bottom Navigation -->
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintTop_toBottomOf="@id/header_layout_nofication_back"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp">
+
+
+    </ScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -49,6 +61,5 @@
         app:itemIconTint="@color/color_navigation_selector"
         app:itemTextColor="@color/color_navigation_selector"
         app:menu="@menu/bottom_navigation_menu"/>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

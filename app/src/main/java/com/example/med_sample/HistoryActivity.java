@@ -33,7 +33,7 @@ public class HistoryActivity extends AppCompatActivity {
         // Set up the back button click listener
         View backButton = findViewById(R.id.backtodashboard);
         backButton.setOnClickListener(v -> {
-            // Navigate back to dashboardaActivity to display the home fragment
+            // Navigate back to Dashboard_main to display the home fragment
             Intent intent = new Intent(HistoryActivity.this, Dashboard_main.class);
             intent.putExtra("navigate_to", "home");
             startActivity(intent);
