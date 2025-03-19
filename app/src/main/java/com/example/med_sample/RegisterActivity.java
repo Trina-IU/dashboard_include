@@ -29,7 +29,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        inputName = findViewById(R.id.inputUsername); // For the user's name
+        inputName = findViewById(R.id.inputUsername);
         inputEmail = findViewById(R.id.inputEmail);
         inputPassword = findViewById(R.id.inputPassword);
 
@@ -69,7 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
                         }
                     });
         });
-        View loginBtn = findViewById(R.id.AlreadyHaveAnAccount);
+        View loginBtn = findViewById(R.id.tAlreadyHaveAnAccount);
         loginBtn.setOnClickListener(v -> {
             startActivity(new Intent(this, LoginActivity.class));
         });

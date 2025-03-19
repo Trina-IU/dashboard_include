@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +21,7 @@ public class NotificationActivity extends AppCompatActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnItemSelectedListener(BottomNavigationUtil.getNavListener(this));
 
+        // Set up the back button click listener
         LinearLayout notification = findViewById(R.id.header_layout_nofication_back);
         notification.setOnClickListener(v -> {
             Intent intent = new Intent(NotificationActivity.this, Dashboard_main.class);
@@ -31,6 +31,7 @@ public class NotificationActivity extends AppCompatActivity {
         });
 
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

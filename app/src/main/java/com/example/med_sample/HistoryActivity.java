@@ -3,11 +3,11 @@ package com.example.med_sample;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
-import com.example.med_sample.fragments.headerFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -15,29 +15,30 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
 
-        // Add Fragment to header_container
-        Fragment headerFragment = new headerFragment();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.header_container, headerFragment)
-                .commit();
+        BottomNavigationView bottomNa = findViewById(R.id.bottom_navigation);
+        bottomNa.setOnItemSelectedListener(BottomNavigationUtil.getNavListener(this));
 
-        initializeUI();
+        // Set up the back button click listener
+        View backButton = findViewById(R.id.header_layout_history_back);
+        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
-    private void initializeUI() {
-        // Set up the back button click listener
-        View backButton = findViewById(R.id.backtodashboard);
-        backButton.setOnClickListener(v -> {
-            // Navigate back to Dashboard_main to display the home fragment
-            Intent intent = new Intent(HistoryActivity.this, Dashboard_main.class);
-            intent.putExtra("navigate_to", "home");
-            startActivity(intent);
-            finish();
-        });
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        BottomNavigationUtil.handlePermissionsResult(requestCode, grantResults, this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        BottomNavigationUtil.handleActivityResult(requestCode, resultCode, data, this);
     }
 }
+
+
+
+
+

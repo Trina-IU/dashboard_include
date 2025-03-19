@@ -13,9 +13,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Create an Account"
-        android:textColor="#FFFFFF"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.537"
@@ -35,14 +35,14 @@
         android:drawablePadding="10dp"
         android:ems="10"
         android:hint="Enter a surname"
+        android:inputType="text"
         android:textColorHint="#808080"
         android:textColor="@color/black"
-        android:inputType="text"
+        android:shadowColor="#FFFFFF"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
-        android:shadowColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,9 +58,9 @@
         android:drawablePadding="10dp"
         android:ems="10"
         android:hint="Enter your Email"
+        android:inputType="text"
         android:textColorHint="#808080"
         android:textColor="@color/black"
-        android:inputType="text"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
         android:paddingRight="10dp"
@@ -80,9 +80,9 @@
         android:drawablePadding="10dp"
         android:ems="10"
         android:hint="Enter your password"
+        android:inputType="textPassword"
         android:textColorHint="#808080"
         android:textColor="@color/black"
-        android:inputType="textPassword"
         android:paddingLeft="20dp"
         android:paddingTop="10dp"
         android:paddingRight="10dp"
@@ -104,31 +104,39 @@
         app:layout_constraintStart_toStartOf="@+id/inputPassword"
         app:layout_constraintTop_toBottomOf="@+id/inputPassword" />
 
-    <TextView
-        android:id="@+id/AlreadyHaveAnAccount"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:shadowColor="#FFFFFF"
-        android:text="Already have an account?"
-        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="@+id/btnLogin"
-        app:layout_constraintHorizontal_bias="0.254"
         app:layout_constraintStart_toStartOf="@+id/btnLogin"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin">
 
-    <TextView
-        android:id="@+id/tAlreadyHaveAnAccount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text=" Login"
-        android:textColor="#EAC6B7"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/AlreadyHaveAnAccount"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin"
-        app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/AlreadyHaveAnAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:shadowColor="#FFFFFF"
+            android:text="Already have an account?"
+            android:textColor="#FFFFFF"
+            tools:layout_editor_absoluteX="92dp"
+            tools:layout_editor_absoluteY="39dp" />
+
+        <TextView
+            android:id="@+id/tAlreadyHaveAnAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" Login"
+            android:textColor="#EAC6B7"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

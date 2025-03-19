@@ -12,14 +12,9 @@
         android:id="@+id/logo"
         android:layout_width="231dp"
         android:layout_height="97dp"
-        android:layout_margin="16dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="300dp"
-        android:layout_marginEnd="50dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginTop="80dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_logo"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -28,9 +23,9 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="18dp"
         android:layout_marginRight="30dp"
+        android:layout_marginLeft="30dp"
         android:gravity="center"
         android:text="Before using our app, please read\nand accept our Terms &amp; Conditions.."
         app:layout_constraintEnd_toEndOf="parent"
@@ -42,7 +37,7 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="TERMS &amp; \nCONDITIONS"
         android:textSize="26sp"
@@ -56,6 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="260dp"
         android:layout_marginStart="35dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="35dp"
         android:layout_marginBottom="2dp"
         android:background="@drawable/rounded_scrollview"
@@ -74,10 +70,10 @@
             android:id="@+id/scrollableTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="4dp"
+            android:lineSpacingExtra="1dp"
             android:text="@string/scrollable_text"
-            android:textColor="#000000"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textColor="#000000"/>
     </ScrollView>
 
     <Button

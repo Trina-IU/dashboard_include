@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ScrollView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class TermsconditionActivity extends AppCompatActivity {
@@ -21,11 +22,8 @@ public class TermsconditionActivity extends AppCompatActivity {
         scrollView = findViewById(R.id.scrollView2); // Assign to the class-level variable
 
         // Decline button action
-        declineBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(TermsconditionActivity.this, StartpageActivity.class);
-            startActivity(intent);
-            finish(); // Close this activity
-        });
+        declineBtn.setOnClickListener(v -> showDeclineMessage());
+
 
         // Disable accept button initially
         acceptBtn.setEnabled(false);
@@ -48,10 +46,13 @@ public class TermsconditionActivity extends AppCompatActivity {
     }
 
     private boolean isScrollViewAtBottom() {
-        if (scrollView.getChildCount() > 0) { // Ensure it has children
+        if (scrollView.getChildCount() > 0) {
             int diff = scrollView.getChildAt(0).getBottom() - (scrollView.getHeight() + scrollView.getScrollY());
             return diff <= 0;
         }
         return false;
+    }
+    private void showDeclineMessage() {
+        Toast.makeText(this, "You must accept the terms and conditions to continue.:>", Toast.LENGTH_SHORT).show();
     }
 }
