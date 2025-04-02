@@ -1,8 +1,18 @@
-<!-- styles.xml -->
-<resources>
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <!-- Set default font for all text views -->
+    <!-- styles.xml -->
+    <resources>
+        <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+            <!-- Set default font for all text views -->
+            <item name="android:fontFamily">@font/font</item>
+            <item name="fontFamily">@font/font</item> <!-- For Material Components -->
+        </style>
+
+    <!-- CalendarView date text -->
+    <style name="CustomCalendarDateText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#FFFFFF</item>
         <item name="android:fontFamily">@font/font</item>
-        <item name="fontFamily">@font/font</item> <!-- For Material Components -->
     </style>
-</resources>
+
+
+
+    </resources>
