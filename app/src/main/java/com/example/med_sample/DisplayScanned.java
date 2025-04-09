@@ -1,14 +1,17 @@
 package com.example.med_sample;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.med_sample.fragments.scan;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -22,26 +25,45 @@ import java.util.Calendar;
 public class DisplayScanned extends AppCompatActivity {
 
     private TextView resultTextView;
+    private ImageView capturedImageView;
     private Bitmap capturedImage;
     private DatabaseReference dbRef;
     private DatabaseReference historyRef;
     private String userId;
-    private Button processButton;
+    private Button processButton, retakeButton;
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
+            if (capturedImage != null) {
+                capturedImageView.setImageBitmap(capturedImage);
+                this.capturedImage = capturedImage; // Update the captured image for further processing
+                recognizeText(); // Re-run text recognition on the new image
+            }
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.display_scanned);
 
         resultTextView = findViewById(R.id.result_text);
-        capturedImage = getIntent().getParcelableExtra("capturedImage");
+        capturedImageView = findViewById(R.id.capturedImageView);
         processButton = findViewById(R.id.saveButton);
+        retakeButton = findViewById(R.id.retakeButton);
+
+        capturedImage = getIntent().getParcelableExtra("capturedImage");
 
         if (capturedImage == null) {
             Toast.makeText(this, "Image not found", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
+
+        // Display the captured image in the ImageView
+        capturedImageView.setImageBitmap(capturedImage);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -56,12 +78,29 @@ public class DisplayScanned extends AppCompatActivity {
 
         recognizeText();
 
+        // Retake button functionality
+        retakeButton.setOnClickListener(v -> {
+            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(cameraIntent, 100); // Use a request code (e.g., 100)
+            } else {
+                Toast.makeText(this, "No camera app available", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        // Process button functionality
         processButton.setOnClickListener(v -> {
             String extractedText = resultTextView.getText().toString();
             if (!extractedText.isEmpty()) {
                 saveMedicineScheduleToDatabase("Prescription", extractedText);
                 saveToHistory(extractedText);
                 Toast.makeText(this, "Saved successfully", Toast.LENGTH_SHORT).show();
+
+                // Navigate to Dashboard
+                Intent intent = new Intent(this, Dashboard_main.class); // Replace with your dashboard activity
+                startActivity(intent);
+                finish();
             } else {
                 Toast.makeText(this, "No text to save", Toast.LENGTH_SHORT).show();
             }
@@ -149,18 +188,15 @@ public class DisplayScanned extends AppCompatActivity {
         public String text;
         public long timestamp;
 
-        // Default constructor required for Firebase
         public HistoryItem() {
         }
 
-        // Constructor to initialize fields
         public HistoryItem(String id, String text, long timestamp) {
             this.id = id;
             this.text = text;
             this.timestamp = timestamp;
         }
 
-        // Getters and setters for Firebase serialization
         public String getId() {
             return id;
         }
@@ -183,6 +219,7 @@ public class DisplayScanned extends AppCompatActivity {
 
         public void setTimestamp(long timestamp) {
             this.timestamp = timestamp;
+
         }
     }
 }
