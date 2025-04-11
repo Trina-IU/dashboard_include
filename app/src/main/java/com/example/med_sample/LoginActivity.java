@@ -5,19 +5,15 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -27,7 +23,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
@@ -51,48 +46,42 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         });
 
-        View createAccountBtn = findViewById(R.id.textViewCreateAccount);
-        createAccountBtn.setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-        });
-
         View loginBtn = findViewById(R.id.btnLogin);
         loginBtn.setOnClickListener(v -> {
             String email = inputEmail.getText().toString().trim();
             String password = inputPassword.getText().toString().trim();
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (mAuth != null) {
-                mAuth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(LoginActivity.this, Dashboard_main.class));  // Navigate to Dashboard
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null && user.isEmailVerified()) {
+                                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(this, Dashboard_main.class)); // Navigate to Dashboard
                                 finish();
                             } else {
-                                Toast.makeText(LoginActivity.this, "Login Failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show();
+                                mAuth.signOut(); // Sign out the user if email is not verified
                             }
-                        });
-            } else {
-                Toast.makeText(LoginActivity.this, "Authentication service unavailable", Toast.LENGTH_SHORT).show();
-            }
+                        } else {
+                            Toast.makeText(this, "Login Failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
         TextView forgotPassword = findViewById(R.id.forgotPassword);
         forgotPassword.setOnClickListener(v -> {
-            // Navigate to ForgotPasswordActivity
-            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, ForgotPasswordActivity.class));
         });
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.logo), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        View createAccountBtn = findViewById(R.id.textViewCreateAccount);
+        createAccountBtn.setOnClickListener(v -> {
+            startActivity(new Intent(this, RegisterActivity.class));
         });
     }
 }
