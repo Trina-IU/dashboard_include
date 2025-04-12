@@ -37,9 +37,15 @@
             android:textSize="28sp" />
     </LinearLayout>
 
-    <!-- Scrollable Content -->
-
-    <!-- Bottom Navigation -->
+    <TextView
+        android:id="@+id/reminder_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:textSize="18sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"

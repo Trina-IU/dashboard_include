@@ -71,6 +71,16 @@
             android:background="@drawable/rounded_calendar"
             android:dateTextAppearance="@style/CustomCalendarDateText"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ListView
+            android:id="@+id/schedule_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="1dp" />
+
     </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
