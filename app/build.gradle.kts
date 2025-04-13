@@ -6,7 +6,6 @@ plugins {
 android {
     namespace = "com.example.med_sample"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.example.med_sample"
         minSdk = 24
@@ -43,6 +42,7 @@ android {
 }
 
 dependencies {
+    implementation (project(":sdk")) // OpenCV SDK
     //ML Kit OCR(Handwriting recognition)
     implementation("com.google.mlkit:text-recognition:16.0.1")
     //CameraX for camera integration

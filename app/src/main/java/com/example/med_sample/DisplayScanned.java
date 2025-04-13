@@ -20,9 +20,18 @@ import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
 import java.util.Calendar;
 
 public class DisplayScanned extends AppCompatActivity {
+
+    // Move static block to class level [[6]]
+    static {
+        System.loadLibrary("opencv_java4");
+    }
 
     private TextView resultTextView;
     private ImageView capturedImageView;
@@ -39,11 +48,12 @@ public class DisplayScanned extends AppCompatActivity {
             Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
             if (capturedImage != null) {
                 capturedImageView.setImageBitmap(capturedImage);
-                this.capturedImage = capturedImage; // Update the captured image for further processing
-                recognizeText(); // Re-run text recognition on the new image
+                this.capturedImage = capturedImage;
+                recognizeText();
             }
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +72,6 @@ public class DisplayScanned extends AppCompatActivity {
             return;
         }
 
-        // Display the captured image in the ImageView
         capturedImageView.setImageBitmap(capturedImage);
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -70,7 +79,6 @@ public class DisplayScanned extends AppCompatActivity {
         } else {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
             finish();
-            return;
         }
 
         dbRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("medicine_schedule");
@@ -78,27 +86,22 @@ public class DisplayScanned extends AppCompatActivity {
 
         recognizeText();
 
-        // Retake button functionality
         retakeButton.setOnClickListener(v -> {
             Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
             if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(cameraIntent, 100); // Use a request code (e.g., 100)
+                startActivityForResult(cameraIntent, 100);
             } else {
                 Toast.makeText(this, "No camera app available", Toast.LENGTH_SHORT).show();
             }
         });
 
-
-        // Process button functionality
         processButton.setOnClickListener(v -> {
             String extractedText = resultTextView.getText().toString();
             if (!extractedText.isEmpty()) {
                 saveMedicineScheduleToDatabase("Prescription", extractedText);
                 saveToHistory(extractedText);
                 Toast.makeText(this, "Saved successfully", Toast.LENGTH_SHORT).show();
-
-                // Navigate to Dashboard
-                Intent intent = new Intent(this, Dashboard_main.class); // Replace with your dashboard activity
+                Intent intent = new Intent(this, Dashboard_main.class);
                 startActivity(intent);
                 finish();
             } else {
@@ -108,8 +111,27 @@ public class DisplayScanned extends AppCompatActivity {
     }
 
     private void recognizeText() {
-        InputImage image = InputImage.fromBitmap(capturedImage, 0);
-        TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+        Mat mat = new Mat();
+        Utils.bitmapToMat(capturedImage, mat);
+
+        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.adaptiveThreshold(
+                mat, mat, 255,
+                Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                Imgproc.THRESH_BINARY, 11, 2
+        );
+
+        Bitmap processedBitmap = Bitmap.createBitmap(
+                mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888
+        );
+        Utils.matToBitmap(mat, processedBitmap);
+        mat.release();
+
+        InputImage image = InputImage.fromBitmap(processedBitmap, 0);
+        TextRecognizer recognizer = TextRecognition.getClient(
+                new TextRecognizerOptions.Builder()
+                        .build()
+        );
 
         recognizer.process(image)
                 .addOnSuccessListener(visionText -> {
@@ -118,7 +140,7 @@ public class DisplayScanned extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     resultTextView.setText("OCR failed: " + e.getMessage());
-                    Log.e("OCR", "Failed to process image: " + e.getMessage());
+                    Log.e("OCR", "Error: " + e.getMessage());
                 });
     }
 

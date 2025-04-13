@@ -7,6 +7,7 @@
         android:name="android.hardware.camera"
         android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
 
@@ -41,7 +42,9 @@
         <activity android:name=".TermsconditionActivity"/>
         <activity android:name=".MedicinescheduleActivity"/>
         <activity android:name=".ForgotPasswordActivity" />
-
+        <meta-data
+            android:name="com.google.android.gms.vision.API_KEY"
+            android:value="AIzaSyA34mDGMNdP6U7RNMw-rot-4jLYxhiupIM" />
     </application>
 
 </manifest>
