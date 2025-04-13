@@ -255,10 +255,15 @@ public class DisplayScanned extends AppCompatActivity {
 
         }
     }private Mat autoRotate(Mat mat) {
-        // Detect orientation (simplified example)
+        String imagePath = getIntent().getStringExtra("imagePath");
+        if (imagePath == null || imagePath.isEmpty()) {
+            // If no imagePath is provided, simply return mat without rotation
+            return mat;
+        }
+
         int orientation = ExifInterface.ORIENTATION_NORMAL;
         try {
-            ExifInterface exif = new ExifInterface(getIntent().getStringExtra("imagePath"));
+            ExifInterface exif = new ExifInterface(imagePath);
             orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
         } catch (IOException e) {
             e.printStackTrace();
