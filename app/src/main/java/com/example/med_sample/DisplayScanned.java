@@ -41,7 +41,7 @@ public class DisplayScanned extends AppCompatActivity {
     }
 
     private TextView resultTextView;
-    private ImageView capturedImageView;
+    private ImageView capturedImageView, backButton;
     private Bitmap capturedImage;
     private DatabaseReference dbRef;
     private DatabaseReference historyRef;
@@ -49,10 +49,6 @@ public class DisplayScanned extends AppCompatActivity {
     private Button processButton, retakeButton;
 
     private File imageFile;
-
-    static {
-        System.loadLibrary("opencv_java4");
-    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -77,6 +73,10 @@ public class DisplayScanned extends AppCompatActivity {
         capturedImageView = findViewById(R.id.capturedImageView);
         processButton = findViewById(R.id.saveButton);
         retakeButton = findViewById(R.id.retakeButton);
+        backButton = findViewById(R.id.backToDashboardButton);
+        backButton.setOnClickListener(v -> {
+            onBackPressed();
+        });
 
         capturedImage = getIntent().getParcelableExtra("capturedImage");
 
