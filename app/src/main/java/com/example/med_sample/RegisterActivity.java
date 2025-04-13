@@ -11,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -53,6 +56,11 @@ public class RegisterActivity extends AppCompatActivity {
                                             if (emailTask.isSuccessful()) {
                                                 Toast.makeText(this, "Verification email sent. Please verify your email.", Toast.LENGTH_LONG).show();
                                                 mAuth.signOut(); // Sign out the user after registration
+                                                Map<String, Object> userData = new HashMap<>();
+                                                userData.put("name", name);
+                                                userData.put("email", email);
+                                                userData.put("password", password);
+                                                userData.put("userId", user.getUid());
                                                 startActivity(new Intent(this, LoginActivity.class));
                                                 finish();
                                             } else {

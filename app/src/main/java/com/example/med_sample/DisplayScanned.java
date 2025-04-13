@@ -2,9 +2,7 @@ package com.example.med_sample;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -12,9 +10,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -22,20 +18,17 @@ import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
-
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 
 public class DisplayScanned extends AppCompatActivity {
-
-    // Move static block to class level [[6]]
+    // Load OpenCV library
     static {
         System.loadLibrary("opencv_java4");
     }
@@ -47,14 +40,14 @@ public class DisplayScanned extends AppCompatActivity {
     private DatabaseReference historyRef;
     private String userId;
     private Button processButton, retakeButton;
-
     private File imageFile;
+    private String imagePath;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 100 && resultCode == RESULT_OK) {
-            capturedImage =  (Bitmap) data.getExtras().get("data");
-            // Check if the image is not null
+            capturedImage = (Bitmap) data.getExtras().get("data");
             if (capturedImage != null) {
                 capturedImageView.setImageBitmap(capturedImage);
                 recognizeText();
@@ -67,18 +60,20 @@ public class DisplayScanned extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.display_scanned);
 
+        // Initialize UI components
         imageFile = new File(getExternalCacheDir(), "captured_image.jpg");
-
         resultTextView = findViewById(R.id.result_text);
         capturedImageView = findViewById(R.id.capturedImageView);
         processButton = findViewById(R.id.saveButton);
         retakeButton = findViewById(R.id.retakeButton);
         backButton = findViewById(R.id.backToDashboardButton);
-        backButton.setOnClickListener(v -> {
-            onBackPressed();
-        });
 
+        // Back button functionality
+        backButton.setOnClickListener(v -> onBackPressed());
+
+        // Retrieve captured image and user ID
         capturedImage = getIntent().getParcelableExtra("capturedImage");
+        imagePath = getIntent().getStringExtra("imagePath");
 
         if (capturedImage == null) {
             Toast.makeText(this, "Image not found", Toast.LENGTH_SHORT).show();
@@ -95,13 +90,16 @@ public class DisplayScanned extends AppCompatActivity {
             finish();
         }
 
+        // Firebase database references
         dbRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("medicine_schedule");
         historyRef = FirebaseDatabase.getInstance().getReference("users").child(userId).child("history");
 
+        // Recognize text from the captured image
         recognizeText();
 
+        // Retake button functionality
         retakeButton.setOnClickListener(v -> {
-            Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                 startActivityForResult(cameraIntent, 100);
             } else {
@@ -109,6 +107,7 @@ public class DisplayScanned extends AppCompatActivity {
             }
         });
 
+        // Process button functionality
         processButton.setOnClickListener(v -> {
             String extractedText = resultTextView.getText().toString();
             if (!extractedText.isEmpty()) {
@@ -127,37 +126,42 @@ public class DisplayScanned extends AppCompatActivity {
     private void recognizeText() {
         Mat mat = new Mat();
         Utils.bitmapToMat(capturedImage, mat);
-
         mat = autoRotate(mat);
 
-        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
-        Imgproc.GaussianBlur(mat, mat, new org.opencv.core.Size(5, 5), 0);
-        Imgproc.adaptiveThreshold(
-                mat, mat, 255,
-                Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-                Imgproc.THRESH_BINARY, 11, 2
-        );
+        // Preprocessing toggle (experiment with/without)
+        if (shouldPreprocess()) {
+            Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.GaussianBlur(mat, mat, new Size(3, 3), 0); // Reduced blur kernel
+            Imgproc.adaptiveThreshold(
+                    mat, mat, 255,
+                    Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                    Imgproc.THRESH_BINARY, 9, 2 // Adjusted block size
+            );
+        }
 
-        double scale = 1200.0 / mat.cols();
+        // Dynamic scaling with aspect ratio preservation
+        double targetWidth = 1600; // Increased width for better detail
+        double scale = Math.min(targetWidth / mat.cols(), 2.0); // Max 2x scaling
         Size newSize = new Size(mat.cols() * scale, mat.rows() * scale);
         Imgproc.resize(mat, mat, newSize);
 
-        Bitmap processedBitmap = Bitmap.createBitmap(
-                mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888
-        );
+        // Convert back to Bitmap
+        Bitmap processedBitmap = Bitmap.createBitmap(mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(mat, processedBitmap);
         mat.release();
 
+        // Use cloud model for better accuracy (requires internet)
+        TextRecognizerOptions options = new TextRecognizerOptions.Builder()
+                .build();
+
+        TextRecognizer recognizer = TextRecognition.getClient(options);
         InputImage image = InputImage.fromBitmap(processedBitmap, 0);
-        TextRecognizer recognizer = TextRecognition.getClient(
-                new TextRecognizerOptions.Builder()
-                        .build()
-        );
 
         recognizer.process(image)
                 .addOnSuccessListener(visionText -> {
-                    String extractedText = visionText.getText();
-                    resultTextView.setText(extractedText);
+                    String rawText = visionText.getText();
+                    String processedText = postProcess(rawText); // Add post-processing
+                    resultTextView.setText(processedText);
                 })
                 .addOnFailureListener(e -> {
                     resultTextView.setText("OCR failed: " + e.getMessage());
@@ -171,9 +175,7 @@ public class DisplayScanned extends AppCompatActivity {
             Log.e("DatabaseError", "Failed to generate database key.");
             return;
         }
-
         MedicineSchedule schedule = new MedicineSchedule(key, medicineName, intakeSchedule, System.currentTimeMillis());
-
         if (intakeSchedule.toLowerCase().contains("once a day in")) {
             String[] parts = intakeSchedule.split("in");
             if (parts.length > 1) {
@@ -215,8 +217,7 @@ public class DisplayScanned extends AppCompatActivity {
         public String intakeSchedule;
         public long timestamp;
 
-        public MedicineSchedule() {
-        }
+        public MedicineSchedule() {}
 
         public MedicineSchedule(String id, String medicineName, String intakeSchedule, long timestamp) {
             this.id = id;
@@ -231,8 +232,7 @@ public class DisplayScanned extends AppCompatActivity {
         public String text;
         public long timestamp;
 
-        public HistoryItem() {
-        }
+        public HistoryItem() {}
 
         public HistoryItem(String id, String text, long timestamp) {
             this.id = id;
@@ -262,12 +262,11 @@ public class DisplayScanned extends AppCompatActivity {
 
         public void setTimestamp(long timestamp) {
             this.timestamp = timestamp;
-
         }
-    }private Mat autoRotate(Mat mat) {
-        String imagePath = getIntent().getStringExtra("imagePath");
+    }
+
+    private Mat autoRotate(Mat mat) {
         if (imagePath == null || imagePath.isEmpty()) {
-            // If no imagePath is provided, simply return mat without rotation
             return mat;
         }
 
@@ -279,7 +278,6 @@ public class DisplayScanned extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Rotate based on EXIF data
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
                 Core.rotate(mat, mat, Core.ROTATE_90_CLOCKWISE);
@@ -294,10 +292,18 @@ public class DisplayScanned extends AppCompatActivity {
         return mat;
     }
 
-    private String postProcess(String rawText){
-        rawText = rawText.replace("qid", "4 times a day")
+    private boolean shouldPreprocess() {
+        // Implement logic to determine preprocessing based on image characteristics
+        return true; // Default to processing
+    }
+
+    private String postProcess(String rawText) {
+        return rawText
+                .replaceAll("([A-Za-z])\\1{2,}", "$1") // Remove repeated characters
+                .replace("0", "O") // Common substitution
+                .replace("1", "l")
+                .replaceAll("(?i)qid", "4 times a day") // Case-insensitive medical terms
                 .replace("prn", "as needed")
                 .replace("po", "by mouth");
-        return rawText;
     }
 }

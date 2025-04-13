@@ -19,13 +19,13 @@ import com.example.med_sample.MedicinescheduleActivity;
 import com.example.med_sample.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class profile extends Fragment {
 
     public profile() {
     }
+
     private EditText userNameEditText;
     private EditText userEmailEditText;
     private EditText userAgeEditText;
@@ -35,14 +35,13 @@ public class profile extends Fragment {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        // Dynamically add headerFragment( the header!)
+        // Dynamically add headerFragment (the header)
         Fragment headerFragment = new headerFragment();
         FragmentManager fragmentManager = getChildFragmentManager();
         fragmentManager.beginTransaction()
@@ -62,72 +61,74 @@ public class profile extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
+        if (currentUser == null) {
+            Toast.makeText(getContext(), "User not authenticated", Toast.LENGTH_SHORT).show();
+            return view;
+        }
 
+        String userId = currentUser.getUid();
+
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        userNameEditText.setText(documentSnapshot.getString("name"));
+                        userEmailEditText.setText(documentSnapshot.getString("email"));
+                        userAgeEditText.setText(documentSnapshot.getString("age"));
+                        userPasswordEditText.setText(documentSnapshot.getString("password"));
+                    } else {
+                        Toast.makeText(getContext(), "No user data found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Error retrieving data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+        // Handle click listener for history LinearLayout
+        View historyLayout = view.findViewById(R.id.linearLayout_profilehistory);
+        historyLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), HistoryActivity.class);
+            startActivity(intent);
+        });
+
+        View scheduleLayout = view.findViewById(R.id.linearLayout_profileschedule);
+        scheduleLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), MedicinescheduleActivity.class);
+            startActivity(intent);
+        });
+
+        editButton.setOnClickListener(v -> {
+            setEditable(true);
+            saveButton.setVisibility(View.VISIBLE);
+            editButton.setVisibility(View.GONE);
+        });
+
+        // Save button
+        saveButton.setOnClickListener(v -> {
+            String updatedName = userNameEditText.getText().toString().trim();
+            String updatedEmail = userEmailEditText.getText().toString().trim();
+            String updatedAge = userAgeEditText.getText().toString().trim();
+            String updatedPassword = userPasswordEditText.getText().toString().trim();
 
             db.collection("users").document(userId)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            userNameEditText.setText(documentSnapshot.getString("name"));
-                            userEmailEditText.setText(documentSnapshot.getString("email"));
-                            userAgeEditText.setText(documentSnapshot.getString("age"));
-                            userPasswordEditText.setText(documentSnapshot.getString("password"));
-                        } else {
-                            Toast.makeText(getContext(), "No user data found", Toast.LENGTH_SHORT).show();
-                        }
+                    .update("name", updatedName,
+                            "email", updatedEmail,
+                            "age", updatedAge,
+                            "password", updatedPassword)
+                    .addOnSuccessListener(unused -> {
+                        Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                        setEditable(false);
+                        saveButton.setVisibility(View.GONE);
+                        editButton.setVisibility(View.VISIBLE);
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error retrieving data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
-
-
-            // Handle click listener for history LinearLayout
-            View historyLayout = view.findViewById(R.id.linearLayout_profilehistory);
-            historyLayout.setOnClickListener(v -> {
-                Intent intent = new Intent(getActivity(), HistoryActivity.class);
-                startActivity(intent);
-            });
-
-            View scheduleLayout = view.findViewById(R.id.linearLayout_profileschedule);
-            scheduleLayout.setOnClickListener(v -> {
-                Intent intent = new Intent(getActivity(), MedicinescheduleActivity.class);
-                startActivity(intent);
-            });
-
-            editButton.setOnClickListener(v -> {
-                setEditable(true);
-                saveButton.setVisibility(View.VISIBLE);
-                editButton.setVisibility(View.GONE);
-            });
-
-            // Save button
-            saveButton.setOnClickListener(v -> {
-                String updatedName = userNameEditText.getText().toString().trim();
-                String updatedEmail = userEmailEditText.getText().toString().trim();
-                String updatedAge = userAgeEditText.getText().toString().trim();
-                String updatedPassword = userPasswordEditText.getText().toString().trim();
-
-                db.collection("users").document(userId)
-                        .update("name", updatedName,
-                                "email", updatedEmail,
-                                "age", updatedAge,
-                                "password", updatedPassword)
-                        .addOnSuccessListener(unused -> {
-                            Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-                            setEditable(false);
-                            saveButton.setVisibility(View.GONE);
-                            editButton.setVisibility(View.VISIBLE);
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(getContext(), "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-            });
-        }
+        });
 
         return view;
     }
+
     private void setEditable(boolean isEditable) {
         userNameEditText.setEnabled(isEditable);
         userEmailEditText.setEnabled(isEditable);
