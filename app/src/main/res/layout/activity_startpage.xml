@@ -37,7 +37,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="click anywhere to coontinue..."
+        android:text="click anywhere to continue..."
         android:textSize="14sp"
         android:textColor="#EAC6B7"
         app:layout_constraintBottom_toBottomOf="parent"

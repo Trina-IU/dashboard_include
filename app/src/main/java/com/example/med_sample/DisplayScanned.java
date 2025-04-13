@@ -2,8 +2,11 @@ package com.example.med_sample;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -11,8 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.med_sample.fragments.scan;
+import androidx.core.content.FileProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -27,6 +29,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -45,14 +48,19 @@ public class DisplayScanned extends AppCompatActivity {
     private String userId;
     private Button processButton, retakeButton;
 
+    private File imageFile;
+
+    static {
+        System.loadLibrary("opencv_java4");
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 100 && resultCode == RESULT_OK) {
-            Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
+            capturedImage =  (Bitmap) data.getExtras().get("data");
+            // Check if the image is not null
             if (capturedImage != null) {
                 capturedImageView.setImageBitmap(capturedImage);
-                this.capturedImage = capturedImage;
                 recognizeText();
             }
         }
@@ -62,6 +70,8 @@ public class DisplayScanned extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.display_scanned);
+
+        imageFile = new File(getExternalCacheDir(), "captured_image.jpg");
 
         resultTextView = findViewById(R.id.result_text);
         capturedImageView = findViewById(R.id.capturedImageView);
@@ -282,5 +292,12 @@ public class DisplayScanned extends AppCompatActivity {
                 break;
         }
         return mat;
+    }
+
+    private String postProcess(String rawText){
+        rawText = rawText.replace("qid", "4 times a day")
+                .replace("prn", "as needed")
+                .replace("po", "by mouth");
+        return rawText;
     }
 }
