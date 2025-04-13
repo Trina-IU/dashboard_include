@@ -44,7 +44,7 @@
         <activity android:name=".ForgotPasswordActivity" />
         <meta-data
             android:name="com.google.android.gms.vision.API_KEY"
-            android:value="AIzaSyA34mDGMNdP6U7RNMw-rot-4jLYxhiupIM" />
+            android:value="AIzaSyCY4XFA-HKHP81JINRtD1gMzFaUj1pIS6c" />
     </application>
 
 </manifest>

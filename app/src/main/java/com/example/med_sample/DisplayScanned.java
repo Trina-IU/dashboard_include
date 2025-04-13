@@ -2,6 +2,7 @@ package com.example.med_sample;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -21,9 +22,12 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.io.IOException;
 import java.util.Calendar;
 
 public class DisplayScanned extends AppCompatActivity {
@@ -114,12 +118,19 @@ public class DisplayScanned extends AppCompatActivity {
         Mat mat = new Mat();
         Utils.bitmapToMat(capturedImage, mat);
 
+        mat = autoRotate(mat);
+
         Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.GaussianBlur(mat, mat, new org.opencv.core.Size(5, 5), 0);
         Imgproc.adaptiveThreshold(
                 mat, mat, 255,
                 Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
                 Imgproc.THRESH_BINARY, 11, 2
         );
+
+        double scale = 1200.0 / mat.cols();
+        Size newSize = new Size(mat.cols() * scale, mat.rows() * scale);
+        Imgproc.resize(mat, mat, newSize);
 
         Bitmap processedBitmap = Bitmap.createBitmap(
                 mat.cols(), mat.rows(), Bitmap.Config.ARGB_8888
@@ -243,5 +254,28 @@ public class DisplayScanned extends AppCompatActivity {
             this.timestamp = timestamp;
 
         }
+    }private Mat autoRotate(Mat mat) {
+        // Detect orientation (simplified example)
+        int orientation = ExifInterface.ORIENTATION_NORMAL;
+        try {
+            ExifInterface exif = new ExifInterface(getIntent().getStringExtra("imagePath"));
+            orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Rotate based on EXIF data
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                Core.rotate(mat, mat, Core.ROTATE_90_CLOCKWISE);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                Core.rotate(mat, mat, Core.ROTATE_180);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                Core.rotate(mat, mat, Core.ROTATE_90_COUNTERCLOCKWISE);
+                break;
+        }
+        return mat;
     }
 }
