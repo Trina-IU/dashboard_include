@@ -302,8 +302,18 @@ public class DisplayScanned extends AppCompatActivity {
                 .replaceAll("([A-Za-z])\\1{2,}", "$1") // Remove repeated characters
                 .replace("0", "O") // Common substitution
                 .replace("1", "l")
+                .replace("5", "S") // Example: "5ugar" → "Sugar"
+                .replace("2", "Z") // Example: "2inc" → "Zinc"
+                .replace("!", "I") // Example: "!buprofen" → "Ibuprofen"
                 .replaceAll("(?i)qid", "4 times a day") // Case-insensitive medical terms
                 .replace("prn", "as needed")
-                .replace("po", "by mouth");
+                .replace("po", "by mouth")
+                .replace("bid", "twice daily")
+                .replace("tid", "three times daily")
+                .replace("qod", "every other day")
+                .replace("hs", "at bedtime")
+                .replace("stat", "immediately")
+                .replaceAll("\\s+", " ") // Replace multiple spaces with a single space
+                .trim();// Remove leading/trailing spaces;
     }
 }

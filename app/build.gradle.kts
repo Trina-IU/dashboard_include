@@ -43,6 +43,9 @@ android {
 
 dependencies {
     implementation (project(":sdk")) // OpenCV SDK
+    //TensorFlow
+    implementation ("org.tensorflow:tensorflow-lite:2.9.0")
+    implementation ("org.tensorflow:tensorflow-lite-support:0.3.1")
     //ML Kit OCR(Handwriting recognition)
     implementation("com.google.mlkit:text-recognition:16.0.1")
     //CameraX for camera integration
@@ -50,6 +53,7 @@ dependencies {
     implementation ("androidx.camera:camera-camera2:1.4.0")
     implementation ("androidx.camera:camera-lifecycle:1.4.0")
     implementation ("androidx.camera:camera-view:1.4.0")
+    //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
