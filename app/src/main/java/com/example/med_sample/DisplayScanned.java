@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -69,7 +71,12 @@ public class DisplayScanned extends AppCompatActivity {
         backButton = findViewById(R.id.backToDashboardButton);
 
         // Back button functionality
-        backButton.setOnClickListener(v -> onBackPressed());
+        backButton.setOnClickListener(v -> {
+            if (imageFile != null && imageFile.exists()) {
+                imageFile.delete(); // Delete the image file if it exists
+            }
+            onBackPressed();
+        });
 
         // Retrieve captured image and user ID
         capturedImage = getIntent().getParcelableExtra("capturedImage");
@@ -110,16 +117,25 @@ public class DisplayScanned extends AppCompatActivity {
         // Process button functionality
         processButton.setOnClickListener(v -> {
             String extractedText = resultTextView.getText().toString();
-            if (!extractedText.isEmpty()) {
-                saveMedicineScheduleToDatabase("Prescription", extractedText);
-                saveToHistory(extractedText);
-                Toast.makeText(this, "Saved successfully", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, Dashboard_main.class);
-                startActivity(intent);
-                finish();
-            } else {
+            if (extractedText.isEmpty()) {
                 Toast.makeText(this, "No text to save", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            // Show confirmation dialog
+            new AlertDialog.Builder(this)
+                    .setTitle("Confirm")
+                    .setMessage("Are you sure you want to save this text?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        saveMedicineScheduleToDatabase("Prescription", extractedText);
+                        saveToHistory(extractedText);
+                        Toast.makeText(this, "Saved successfully", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(this, Dashboard_main.class);
+                        startActivity(intent);
+                        finish();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
         });
     }
 
@@ -159,6 +175,10 @@ public class DisplayScanned extends AppCompatActivity {
 
         recognizer.process(image)
                 .addOnSuccessListener(visionText -> {
+                    if (visionText == null || visionText.getText().isEmpty()){
+                        resultTextView.setText("No text found");
+                        return;
+                    }
                     String rawText = visionText.getText();
                     String processedText = postProcess(rawText); // Add post-processing
                     resultTextView.setText(processedText);

@@ -21,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Calendar;
+
 public class profile extends Fragment {
 
     public profile() {
@@ -30,6 +32,7 @@ public class profile extends Fragment {
     private EditText userEmailEditText;
     private EditText userAgeEditText;
     private EditText userPasswordEditText;
+    private String realPassword;
     private Button editButton, saveButton;
 
     private FirebaseAuth mAuth;
@@ -74,8 +77,17 @@ public class profile extends Fragment {
                     if (documentSnapshot.exists()) {
                         userNameEditText.setText(documentSnapshot.getString("name"));
                         userEmailEditText.setText(documentSnapshot.getString("email"));
-                        userAgeEditText.setText(documentSnapshot.getString("age"));
-                        userPasswordEditText.setText(documentSnapshot.getString("password"));
+
+                        // Dynamically calculate age from dateOfBirth
+                        String dateOfBirth = documentSnapshot.getString("dateOfBirth");
+                        if (dateOfBirth != null) {
+                            int age = calculateAge(dateOfBirth);
+                            userAgeEditText.setText(String.valueOf(age));
+                        } else {
+                            userAgeEditText.setText("N/A");
+                        }
+                        realPassword = documentSnapshot.getString("password");
+                        userPasswordEditText.setText("********");
                     } else {
                         Toast.makeText(getContext(), "No user data found", Toast.LENGTH_SHORT).show();
                     }
@@ -101,6 +113,8 @@ public class profile extends Fragment {
             setEditable(true);
             saveButton.setVisibility(View.VISIBLE);
             editButton.setVisibility(View.GONE);
+
+            userPasswordEditText.setText(realPassword);
         });
 
         // Save button
@@ -110,16 +124,25 @@ public class profile extends Fragment {
             String updatedAge = userAgeEditText.getText().toString().trim();
             String updatedPassword = userPasswordEditText.getText().toString().trim();
 
+            if (updatedPassword.equals("********")) {
+                updatedPassword = realPassword;
+            }
+
+            final String finalUpdatedPassword = updatedPassword;
+
             db.collection("users").document(userId)
                     .update("name", updatedName,
                             "email", updatedEmail,
                             "age", updatedAge,
-                            "password", updatedPassword)
+                            "password", finalUpdatedPassword)
                     .addOnSuccessListener(unused -> {
                         Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                         setEditable(false);
                         saveButton.setVisibility(View.GONE);
                         editButton.setVisibility(View.VISIBLE);
+
+                        realPassword = finalUpdatedPassword;
+                        userPasswordEditText.setText("********");
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(getContext(), "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -134,5 +157,42 @@ public class profile extends Fragment {
         userEmailEditText.setEnabled(isEditable);
         userAgeEditText.setEnabled(isEditable);
         userPasswordEditText.setEnabled(isEditable);
+    }
+
+    private int calculateAge(String dateOfBirth) {
+        String[] parts = dateOfBirth.split(" ");
+        int day = Integer.parseInt(parts[1]);
+        int month = getMonthNumber(parts[0]);
+        int year = Integer.parseInt(parts[2]);
+
+        Calendar dob = Calendar.getInstance();
+        dob.set(year, month - 1, day);
+
+        Calendar today = Calendar.getInstance();
+        int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+
+        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+            age--;
+        }
+
+        return age;
+    }
+
+    private int getMonthNumber(String month) {
+        switch (month) {
+            case "Jan": return 1;
+            case "Feb": return 2;
+            case "Mar": return 3;
+            case "Apr": return 4;
+            case "May": return 5;
+            case "Jun": return 6;
+            case "Jul": return 7;
+            case "Aug": return 8;
+            case "Sep": return 9;
+            case "Oct": return 10;
+            case "Nov": return 11;
+            case "Dec": return 12;
+            default: return 1;
+        }
     }
 }
