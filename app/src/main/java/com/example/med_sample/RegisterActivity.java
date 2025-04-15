@@ -104,7 +104,6 @@ public class RegisterActivity extends AppCompatActivity {
                                                 db.collection("users").document(userId).set(userData)
                                                         .addOnSuccessListener(unused -> {
                                                             mAuth.signOut();
-                                                            Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();
                                                             startActivity(new Intent(this, LoginActivity.class));
                                                             finish();
                                                         })
