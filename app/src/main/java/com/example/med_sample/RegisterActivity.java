@@ -82,23 +82,31 @@ public class RegisterActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            String userId = mAuth.getCurrentUser().getUid();
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
+                                String userId = mAuth.getCurrentUser().getUid();
                                 user.sendEmailVerification()
                                         .addOnCompleteListener(emailTask -> {
                                             if (emailTask.isSuccessful()) {
                                                 Toast.makeText(this, "Verification email sent. Please verify your email.", Toast.LENGTH_LONG).show();
                                                 mAuth.signOut(); // Sign out the user after registration
+
                                                 Map<String, Object> userData = new HashMap<>();
                                                 userData.put("name", name);
                                                 userData.put("email", email);
                                                 userData.put("password", password);
                                                 userData.put("userId", user.getUid());
                                                 userData.put("dateOfBirth", dateButton.getText().toString());
-                                                db.collection("users").document(userId).set(userData);
-                                                startActivity(new Intent(this, LoginActivity.class));
-                                                finish();
+
+                                                db.collection("users").document(userId).set(userData)
+                                                        .addOnSuccessListener(unused -> {
+                                                            Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();
+                                                            startActivity(new Intent(this, LoginActivity.class));
+                                                            finish();
+                                                        })
+                                                        .addOnFailureListener(e -> {;
+                                                            Toast.makeText(this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        });
                                             } else {
                                                 Toast.makeText(this, "Failed to send verification email: " + emailTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                             }
@@ -169,9 +177,6 @@ public class RegisterActivity extends AppCompatActivity {
                 month = month + 1;
                 String date = makeDateString(dayOfMonth, month, year);
                 dateButton.setText(date);
-
-                int age = calculateAge(date);
-                Toast.makeText(RegisterActivity.this, "Age: " + age, Toast.LENGTH_SHORT).show();
             }
         };
         Calendar cal = Calendar.getInstance();
