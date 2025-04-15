@@ -69,6 +69,7 @@ public class profile extends Fragment {
 
         setEditable(false);
 
+        // Initialize Firebase Auth and Firestore
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
@@ -84,6 +85,7 @@ public class profile extends Fragment {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
+                        // Populate the EditText fields with user data
                         userNameEditText.setText(documentSnapshot.getString("name"));
                         userEmailEditText.setText(documentSnapshot.getString("email"));
 
@@ -121,6 +123,8 @@ public class profile extends Fragment {
         editButton.setOnClickListener(v -> {
             setEditable(true);
             saveButton.setVisibility(View.VISIBLE);
+            historyLayout.setVisibility(View.GONE);
+            scheduleLayout.setVisibility(View.GONE);
             editButton.setVisibility(View.GONE);
             logoutButton.setVisibility(View.GONE);
 
@@ -140,6 +144,7 @@ public class profile extends Fragment {
 
             final String finalUpdatedPassword = updatedPassword;
 
+            // Validate inputs
             db.collection("users").document(userId)
                     .update("name", updatedName,
                             "email", updatedEmail,
@@ -148,10 +153,14 @@ public class profile extends Fragment {
                     .addOnSuccessListener(unused -> {
                         Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                         setEditable(false);
+                        // Hide the save button and show the edit button
+                        historyLayout.setVisibility(View.VISIBLE);
+                        scheduleLayout.setVisibility(View.VISIBLE);
                         saveButton.setVisibility(View.GONE);
                         editButton.setVisibility(View.VISIBLE);
                         logoutButton.setVisibility(View.VISIBLE);
 
+                        //set the password field to "********" after saving
                         realPassword = finalUpdatedPassword;
                         userPasswordEditText.setText("********");
                     })

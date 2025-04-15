@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.example.med_sample.fragments.home;
 import com.example.med_sample.fragments.profile;
+import com.example.med_sample.fragments.scan;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class BottomNavigationUtil {
@@ -30,9 +31,8 @@ public class BottomNavigationUtil {
                 if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     requestCameraPermission(activity);
                 } else {
-                    openCamera(activity);
+                    selectedFragment = new scan(); // Navigate to scan fragment instead of opening camera directly
                 }
-                return true;
             } else if (item.getItemId() == R.id.nav_profile) {
                 selectedFragment = new profile();
             }
@@ -52,31 +52,27 @@ public class BottomNavigationUtil {
                 CAMERA_REQUEST_CODE);
     }
 
-    private static void openCamera(FragmentActivity activity) {
-        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        if (cameraIntent.resolveActivity(activity.getPackageManager()) != null) {
-            activity.startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
-        } else {
-            Toast.makeText(activity, "No camera app available", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     public static void handlePermissionsResult(int requestCode, @NonNull int[] grantResults, FragmentActivity activity) {
         if (requestCode == CAMERA_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openCamera(activity);
+                activity.getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new scan())
+                        .commit();
             } else {
                 Toast.makeText(activity, "Camera permission is required to use the camera", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+    // Keep this method for handling other camera-related activity results
     public static void handleActivityResult(int requestCode, int resultCode, Intent data, FragmentActivity activity) {
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == FragmentActivity.RESULT_OK) {
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == FragmentActivity.RESULT_OK && data != null && data.getExtras() != null) {
             Bitmap capturedImage = (Bitmap) data.getExtras().get("data");
-            Intent intent = new Intent(activity, DisplayScanned.class);
-            intent.putExtra("capturedImage", capturedImage);
-            activity.startActivity(intent);
+            if (capturedImage != null) {
+                Intent intent = new Intent(activity, DisplayScanned.class);
+                intent.putExtra("capturedImage", capturedImage);
+                activity.startActivity(intent);
+            }
         }
     }
 }
