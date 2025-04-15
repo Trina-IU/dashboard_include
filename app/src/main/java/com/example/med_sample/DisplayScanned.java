@@ -2,7 +2,9 @@ package com.example.med_sample;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -37,7 +39,7 @@ public class DisplayScanned extends AppCompatActivity {
 
         // Retrieve extras from the Intent
         extractedText = getIntent().getStringExtra("extractedText");
-        capturedImage = getIntent().getParcelableExtra("capturedImage");
+        String imagePath = getIntent().getStringExtra("imagePath");
 
         resultTextView = findViewById(R.id.result_text);
         capturedImageView = findViewById(R.id.capturedImageView);
@@ -45,16 +47,25 @@ public class DisplayScanned extends AppCompatActivity {
         retakeButton = findViewById(R.id.retakeButton);
         backToDashboardButton = findViewById(R.id.backToDashboardButton);
 
+        // Enable vertical scrolling for the TextView
+        resultTextView.setMovementMethod(new ScrollingMovementMethod());
+
         backToDashboardButton.setOnClickListener(v -> {
             onBackPressed();
         });
 
-        // Display the captured image and recognized text
-        if (capturedImage != null) {
-            capturedImageView.setImageBitmap(capturedImage);
+        // Load image from file path instead of from intent
+        if (imagePath != null) {
+            capturedImage = BitmapFactory.decodeFile(imagePath);
+            if (capturedImage != null) {
+                capturedImageView.setImageBitmap(capturedImage);
+            } else {
+                Toast.makeText(this, "Could not load image", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "No image available", Toast.LENGTH_SHORT).show();
         }
+
         if (extractedText != null && !extractedText.isEmpty()) {
             resultTextView.setText(extractedText);
         } else {
@@ -63,7 +74,8 @@ public class DisplayScanned extends AppCompatActivity {
 
         // Retake: Return to the home (or scan) fragment
         retakeButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, home.class);
+            Intent intent = new Intent(this, Dashboard_main.class);
+            intent.putExtra("open_scan", true);
             startActivity(intent);
             finish();
         });

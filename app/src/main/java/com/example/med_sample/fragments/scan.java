@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
@@ -117,6 +118,7 @@ public class scan extends Fragment {
         return view;
     }
 
+    @ExperimentalGetImage
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -152,11 +154,8 @@ public class scan extends Fragment {
             public void onTextRecognized(String text) {
                 if (isAdded() && getActivity() != null) {
                     requireActivity().runOnUiThread(() -> {
-                        recognizedText = text;
-                        ocrResultTextView.setText(text);
-                        capturedBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-                        previewImageView.setImageBitmap(capturedBitmap);
-                        confirmCaptureButton.setVisibility(View.VISIBLE);
+                        Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                        navigateToDisplayScanned(text, bitmap);
                     });
                 }
             }
@@ -202,12 +201,26 @@ public class scan extends Fragment {
     }
 
     private void navigateToDisplayScanned(String extractedText, Bitmap bitmap) {
-        Intent intent = new Intent(requireActivity(), DisplayScanned.class);
-        intent.putExtra("extractedText", extractedText);
-        intent.putExtra("capturedImage", bitmap);
-        startActivity(intent);
+        try {
+            // Save bitmap to cache file instead of passing directly
+            File outputDir = requireContext().getCacheDir();
+            File outputFile = new File(outputDir, "temp_image.jpg");
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            fos.close();
+
+            // Pass file path instead of bitmap
+            Intent intent = new Intent(requireActivity(), DisplayScanned.class);
+            intent.putExtra("extractedText", extractedText);
+            intent.putExtra("imagePath", outputFile.getAbsolutePath());
+            startActivity(intent);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show();
+        }
     }
 
+    @ExperimentalGetImage
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
         cameraProviderFuture.addListener(() -> {

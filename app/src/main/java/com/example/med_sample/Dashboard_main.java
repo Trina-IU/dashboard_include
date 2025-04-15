@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.med_sample.fragments.home;
+import com.example.med_sample.fragments.scan;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class Dashboard_main extends AppCompatActivity {
@@ -20,9 +21,17 @@ public class Dashboard_main extends AppCompatActivity {
         bottomNav.setOnItemSelectedListener(BottomNavigationUtil.getNavListener(this));
 
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new home())
-                    .commit();
+            // Check if we should open the scan fragment
+            if (getIntent().getBooleanExtra("open_scan", false)) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new scan())
+                        .commit();
+                bottomNav.setSelectedItemId(R.id.nav_scan);
+            } else {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new home())
+                        .commit();
+            }
         }
     }
 

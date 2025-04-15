@@ -8,35 +8,48 @@
     android:background="@color/bg_mainblue"
     tools:context=".DisplayScanned">
 
-    <!-- ImageView for displaying the captured image -->
+    <!-- ImageView for displaying the captured image - made larger -->
+    <!-- ImageView - Updated top constraint -->
     <ImageView
         android:id="@+id/capturedImageView"
-        android:layout_width="308dp"
-        android:layout_height="344dp"
-        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toTopOf="@+id/result_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <!-- TextView for displaying the recognized text -->
-    <TextView
-        android:id="@+id/result_text"
-        android:layout_width="314dp"
-        android:layout_height="66dp"
-        android:layout_margin="16dp"
-        android:padding="8dp"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/button_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.536"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/capturedImageView" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHeight_percent="0.45" />
+
+    <!-- TextView for displaying the recognized text - made scrollable -->
 
     <!-- Container for buttons -->
 
 
+    <TextView
+        android:id="@+id/result_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/text_background"
+        android:fadeScrollbars="false"
+        android:gravity="top|start"
+        android:padding="12dp"
+        android:scrollbars="vertical"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/button_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/capturedImageView" />
 
     <LinearLayout
         android:id="@+id/button_container"
@@ -74,19 +87,20 @@
             tools:layout_editor_absoluteY="664dp" />
     </LinearLayout>
 
+    <!-- Back Button - Repositioned to top-left -->
     <ImageView
         android:id="@+id/backToDashboardButton"
-        android:layout_width="51dp"
-        android:layout_height="33dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
         android:clickable="true"
         android:contentDescription="@string/back_to_dashboard"
         android:focusable="true"
+        android:padding="8dp"
         android:src="@drawable/ic_back_to_dashboard"
-        app:layout_constraintBottom_toBottomOf="parent"
-
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
