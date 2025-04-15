@@ -89,7 +89,10 @@ public class RegisterActivity extends AppCompatActivity {
                                         .addOnCompleteListener(emailTask -> {
                                             if (emailTask.isSuccessful()) {
                                                 Toast.makeText(this, "Verification email sent. Please verify your email.", Toast.LENGTH_LONG).show();
-                                                mAuth.signOut(); // Sign out the user after registration
+
+                                                Intent intent = new Intent(this, LoginActivity.class);
+                                                startActivity(intent);
+                                                finish();
 
                                                 Map<String, Object> userData = new HashMap<>();
                                                 userData.put("name", name);
@@ -100,6 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                                                 db.collection("users").document(userId).set(userData)
                                                         .addOnSuccessListener(unused -> {
+                                                            mAuth.signOut();
                                                             Toast.makeText(this, "User registered successfully!", Toast.LENGTH_SHORT).show();
                                                             startActivity(new Intent(this, LoginActivity.class));
                                                             finish();
