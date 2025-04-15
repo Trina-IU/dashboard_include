@@ -180,17 +180,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:background="@drawable/bg_profileedit"
         android:text="Edit"
         android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout_profilehistory"
         app:layout_constraintEnd_toStartOf="@+id/btn_save"
-        app:layout_constraintHorizontal_bias="0.945"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name_password"
         app:layout_constraintVertical_bias="0.363" />
+
+    <Button
+        android:id="@+id/logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="38dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_profileedit"
+        android:text="logout"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout_profilehistory"
+        app:layout_constraintEnd_toStartOf="@+id/btn_edit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/name_password"
+        app:layout_constraintVertical_bias="0.357" />
 
     <Button
         android:id="@+id/btn_save"

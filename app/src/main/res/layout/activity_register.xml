@@ -20,7 +20,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.131" />
+        app:layout_constraintVertical_bias="0.112" />
 
     <EditText
         android:id="@+id/inputUsername"
@@ -119,6 +119,19 @@
         app:layout_constraintStart_toStartOf="@+id/inputPassword"
         app:layout_constraintTop_toBottomOf="@+id/inputPassword" />
 
+    <CheckBox
+        android:id="@+id/showPassword"
+        android:layout_width="152dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="10dp"
+        android:layoutDirection="ltr"
+        android:text="Show Password"
+        android:textDirection="ltr"
+        android:textSize="11sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ConfirmPassword" />
+
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="0dp"
@@ -171,7 +184,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
         android:text="Birthday:"
         android:textAlignment="center"
         android:textDirection="firstStrongLtr"
@@ -180,7 +192,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.04"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ConfirmPassword" />
+        app:layout_constraintTop_toBottomOf="@+id/showPassword" />
 
     <Button
         android:id="@+id/dateButton"

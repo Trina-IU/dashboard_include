@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.med_sample.HistoryActivity;
+import com.example.med_sample.LoginActivity;
 import com.example.med_sample.MedicinescheduleActivity;
 import com.example.med_sample.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,7 +34,7 @@ public class profile extends Fragment {
     private EditText userAgeEditText;
     private EditText userPasswordEditText;
     private String realPassword;
-    private Button editButton, saveButton;
+    private Button editButton, saveButton, logoutButton;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -57,6 +58,14 @@ public class profile extends Fragment {
         userPasswordEditText = view.findViewById(R.id.name_password);
         editButton = view.findViewById(R.id.btn_edit);
         saveButton = view.findViewById(R.id.btn_save);
+        logoutButton = view.findViewById(R.id.logout);
+        logoutButton.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            getActivity().finish();
+        });
 
         setEditable(false);
 
@@ -113,6 +122,7 @@ public class profile extends Fragment {
             setEditable(true);
             saveButton.setVisibility(View.VISIBLE);
             editButton.setVisibility(View.GONE);
+            logoutButton.setVisibility(View.GONE);
 
             userPasswordEditText.setText(realPassword);
         });
@@ -140,6 +150,7 @@ public class profile extends Fragment {
                         setEditable(false);
                         saveButton.setVisibility(View.GONE);
                         editButton.setVisibility(View.VISIBLE);
+                        logoutButton.setVisibility(View.VISIBLE);
 
                         realPassword = finalUpdatedPassword;
                         userPasswordEditText.setText("********");
