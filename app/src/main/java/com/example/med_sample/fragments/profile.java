@@ -161,20 +161,20 @@ public class profile extends Fragment {
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
                                 Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_LONG).show();
+
+                                setEditable(false);
+                                // Hide the save button and show the edit button
+                                historyLayout.setVisibility(View.VISIBLE);
+                                scheduleLayout.setVisibility(View.VISIBLE);
+                                saveButton.setVisibility(View.GONE);
+                                editButton.setVisibility(View.VISIBLE);
+                                logoutButton.setVisibility(View.VISIBLE);
+
+                                //set the password field to "********" after saving
+                                realPassword = finalUpdatedPassword;
+                                userPasswordEditText.setText("********");
                             });
                         }
-
-                        setEditable(false);
-                        // Hide the save button and show the edit button
-                        historyLayout.setVisibility(View.VISIBLE);
-                        scheduleLayout.setVisibility(View.VISIBLE);
-                        saveButton.setVisibility(View.GONE);
-                        editButton.setVisibility(View.VISIBLE);
-                        logoutButton.setVisibility(View.VISIBLE);
-
-                        //set the password field to "********" after saving
-                        realPassword = finalUpdatedPassword;
-                        userPasswordEditText.setText("********");
                     })
                     .addOnFailureListener(e -> {
                         if (getActivity() != null) {
