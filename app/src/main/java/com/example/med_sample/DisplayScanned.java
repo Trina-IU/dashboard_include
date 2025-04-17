@@ -14,7 +14,10 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.med_sample.data.model.Medication;
+import com.example.med_sample.data.repository.MedicationRepository;
 import com.example.med_sample.fragments.home;
+import com.example.med_sample.utils.MedicationTextExtractor;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -103,6 +106,7 @@ public class DisplayScanned extends AppCompatActivity {
                     .setTitle("Confirm")
                     .setMessage("Are you sure you want to save this text?")
                     .setPositiveButton("Yes", (dialog, which) -> {
+                        saveDetectedMedications(scannedText);
                         saveMedicineScheduleToDatabase("Prescription", scannedText);
                         saveToHistory(scannedText);
                         Toast.makeText(this, "Saved successfully", Toast.LENGTH_SHORT).show();
@@ -186,5 +190,58 @@ public class DisplayScanned extends AppCompatActivity {
             this.text = text;
             this.timestamp = timestamp;
         }
+    }
+    private void saveDetectedMedications(String extractedText) {
+        MedicationTextExtractor extractor = new MedicationTextExtractor(this);
+        extractor.processMedicationText(extractedText, medications -> {
+            if (!medications.isEmpty()) {
+                // Get repository instance
+                MedicationRepository repository = MedicationRepository.getInstance(this);
+
+                for (MedicationTextExtractor.MedicationInfo medInfo : medications) {
+                    // Check if medication already exists and update or add
+                    repository.getMedicationById(medInfo.getName(), new MedicationRepository.MedicationItemCallback() {
+                        @Override
+                        public void onMedicationLoaded(Medication medication) {
+                            // Medication exists, just log it
+                            Log.d("DisplayScanned", "Medication found in database: " + medication.getName());
+                        }
+
+                        @Override
+                        public void onMedicationNotFound() {
+                            // Create new medication entry from extracted info
+                            Medication newMed = new Medication(
+                                    java.util.UUID.randomUUID().toString(),
+                                    medInfo.getName(),
+                                    medInfo.getGenericName(),
+                                    medInfo.getExtractedDosage(),
+                                    medInfo.getStandardDosage(),
+                                    "Take as directed by your doctor.",
+                                    "Consult healthcare provider for contraindications."
+                            );
+
+                            repository.addMedication(newMed, new MedicationRepository.MedicationOperationCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    Log.d("DisplayScanned", "Added new medication: " + medInfo.getName());
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Log.e("DisplayScanned", "Error adding medication: " + e.getMessage());
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            Log.e("DisplayScanned", "Error checking medication: " + e.getMessage());
+                        }
+                    });
+                }
+
+                Toast.makeText(this, "Detected " + medications.size() + " medications", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

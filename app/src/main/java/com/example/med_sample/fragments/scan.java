@@ -35,6 +35,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.med_sample.DisplayScanned;
 import com.example.med_sample.R;
+import com.example.med_sample.data.repository.MedicationRepository;
+import com.example.med_sample.utils.MedicationTextExtractor;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognition;
@@ -202,6 +204,8 @@ public class scan extends Fragment {
 
     private void navigateToDisplayScanned(String extractedText, Bitmap bitmap) {
         try {
+            validateDetectedMedications(extractedText);
+
             // Save bitmap to cache file instead of passing directly
             File outputDir = requireContext().getCacheDir();
             File outputFile = new File(outputDir, "temp_image.jpg");
@@ -394,5 +398,29 @@ public class scan extends Fragment {
                 .replace("stat", "immediately")
                 .replaceAll("\\s+", " ")
                 .trim();
+    }
+
+    private void validateDetectedMedications(String ocrText) {
+        MedicationTextExtractor extractor = new MedicationTextExtractor(requireContext());
+        extractor.processMedicationText(ocrText, medications -> {
+            if (medications.isEmpty()) {
+                // No known medications found
+                Toast.makeText(requireContext(), "No known medications detected", Toast.LENGTH_SHORT).show();
+            } else {
+                StringBuilder medInfo = new StringBuilder("Detected Medications:\n\n");
+                for (MedicationTextExtractor.MedicationInfo med : medications) {
+                    medInfo.append("- ").append(med.getName()).append("\n")
+                            .append("  Dosage: ").append(med.getExtractedDosage()).append("\n")
+                            .append("  Frequency: ").append(med.getExtractedFrequency()).append("\n\n");
+                }
+
+                // Update OCR result with validated information
+                if (isAdded() && getActivity() != null) {
+                    requireActivity().runOnUiThread(() -> {
+                        ocrResultTextView.setText(medInfo.toString());
+                    });
+                }
+            }
+        });
     }
 }
