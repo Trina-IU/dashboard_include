@@ -12,20 +12,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.concurrent.CountDownLatch;
 
 public class MedicationTextExtractor {
     private static final String TAG = "MedicationExtractor";
 
-    // Commonly used measurement units in prescriptions
-    private static final String[] UNITS = {"mg", "ml", "g", "mcg", "IU", "tablet", "capsule", "tab", "cap"};
+    // Common medication units
+    private static final String[] UNITS = {
+            "mg", "ml", "g", "mcg", "μg", "IU", "tablet", "tablets", "capsule", "capsules",
+            "tab", "tabs", "cap", "caps", "pill", "pills"
+    };
 
-    // Commonly used time indicators
-    private static final String[] TIME_INDICATORS = {"daily", "weekly", "monthly", "hourly", "once", "twice", "qd",
-            "bid", "tid", "qid", "morning", "evening", "night", "bedtime", "before meals", "after meals"};
+    // Common frequency terms
+    private static final String[] TIME_INDICATORS = {
+            "daily", "weekly", "monthly", "hourly", "once", "twice", "three times", "qd",
+            "bid", "tid", "qid", "morning", "noon", "evening", "night", "bedtime",
+            "before meals", "after meals", "with food", "prn", "as needed", "q4h", "q6h",
+            "q8h", "q12h", "every", "hours", "days"
+    };
 
     private final MedicationRepository repository;
+    private final Context context;
 
     public MedicationTextExtractor(Context context) {
+        this.context = context;
         this.repository = MedicationRepository.getInstance(context);
     }
 
@@ -33,55 +43,50 @@ public class MedicationTextExtractor {
      * Process OCR text to extract potential medications
      */
     public void processMedicationText(String ocrText, MedicationExtractionListener listener) {
-        // Extract potential medication names
+        if (ocrText == null || ocrText.trim().isEmpty()) {
+            listener.onMedicationsExtracted(new ArrayList<>());
+            return;
+        }
+
+        Log.d(TAG, "Processing OCR text: " + ocrText);
+
+        // Extract potential medication names first
         List<String> potentialMedNames = extractPotentialMedicationNames(ocrText);
+        if (potentialMedNames.isEmpty()) {
+            Log.d(TAG, "No potential medication names found");
+            listener.onMedicationsExtracted(new ArrayList<>());
+            return;
+        }
 
-        // Extract dosage information
+        Log.d(TAG, "Found potential medications: " + potentialMedNames);
+
+        // Extract dosage and frequency information
         Map<String, String> dosageInfo = extractDosageInfo(ocrText);
-
-        // Extract frequency information
         Map<String, String> frequencyInfo = extractFrequencyInfo(ocrText);
 
-        // Create result map
-        Map<String, MedicationInfo> extractedMedications = new HashMap<>();
+        List<MedicationInfo> results = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(potentialMedNames.size());
 
-        // Validate each potential med name against database
         for (String medName : potentialMedNames) {
-            validateMedicationName(medName, new MedicationRepository.MedicationCallback() {
-                @Override
-                public void onMedicationsLoaded(List<Medication> medications) {
-                    if (!medications.isEmpty()) {
-                        Medication validMed = medications.get(0);
-
-                        // Create medication info object
-                        MedicationInfo info = new MedicationInfo(
-                                validMed.getName(),
-                                validMed.getGenericName(),
-                                dosageInfo.getOrDefault(validMed.getName().toLowerCase(), "Unknown dosage"),
-                                frequencyInfo.getOrDefault(validMed.getName().toLowerCase(), "Unknown frequency"),
-                                validMed.getStandardDosages()
-                        );
-
-                        extractedMedications.put(validMed.getName(), info);
-
-                        // If we've checked all medications, notify listener
-                        if (extractedMedications.size() == potentialMedNames.size()) {
-                            listener.onMedicationsExtracted(new ArrayList<>(extractedMedications.values()));
-                        }
-                    }
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Log.e(TAG, "Error validating medication: " + e.getMessage());
-                }
-            });
+            validateMedication(medName, dosageInfo, frequencyInfo, results, latch);
         }
 
-        // If no medications were found
-        if (potentialMedNames.isEmpty()) {
-            listener.onMedicationsExtracted(new ArrayList<>());
-        }
+        // Process results in a separate thread to not block UI
+        new Thread(() -> {
+            try {
+                // Wait for all validations to complete or timeout after 5 seconds
+                latch.await(5000, java.util.concurrent.TimeUnit.MILLISECONDS);
+
+                // Return results on main thread
+                android.os.Handler mainHandler = new android.os.Handler(context.getMainLooper());
+                mainHandler.post(() -> listener.onMedicationsExtracted(results));
+
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Medication validation interrupted", e);
+                android.os.Handler mainHandler = new android.os.Handler(context.getMainLooper());
+                mainHandler.post(() -> listener.onMedicationsExtracted(results));
+            }
+        }).start();
     }
 
     /**
@@ -90,18 +95,45 @@ public class MedicationTextExtractor {
     private List<String> extractPotentialMedicationNames(String text) {
         List<String> names = new ArrayList<>();
 
-        // Normalize text (remove extra spaces, convert to lowercase)
-        text = text.replaceAll("\\s+", " ").toLowerCase();
+        // Normalize text
+        text = text.replaceAll("\\s+", " ").trim();
 
-        // Simple algorithm: words starting with uppercase are potential medication names
-        String[] words = text.split("\\s+");
-        for (String word : words) {
-            // Clean the word (remove punctuation)
-            word = word.replaceAll("[^a-zA-Z]", "");
+        // Known medication names patterns:
+        // - Words with capital letters (often medication brands)
+        // - Words followed by dosage units
+        // - Common medication suffixes
 
-            // Only consider words with 4+ characters
-            if (word.length() >= 4) {
-                names.add(word);
+        // First, check for words with capital letters
+        Pattern capitalizedPattern = Pattern.compile("\\b[A-Z][a-z]{3,}\\b");
+        Matcher matcher = capitalizedPattern.matcher(text);
+        while (matcher.find()) {
+            String potentialMed = matcher.group();
+            if (!names.contains(potentialMed)) {
+                names.add(potentialMed);
+            }
+        }
+
+        // Check for words before dosage units
+        for (String unit : UNITS) {
+            Pattern dosagePattern = Pattern.compile("\\b([A-Za-z]{4,})\\s+\\d+\\s*" + unit + "\\b",
+                    Pattern.CASE_INSENSITIVE);
+            matcher = dosagePattern.matcher(text);
+            while (matcher.find()) {
+                String potentialMed = matcher.group(1);
+                if (!names.contains(potentialMed)) {
+                    names.add(potentialMed);
+                }
+            }
+        }
+
+        // Check for common medication names
+        String[] commonMeds = {"amoxicillin", "ibuprofen", "acetaminophen", "lisinopril",
+                "metformin", "atorvastatin", "levothyroxine", "metoprolol"};
+        for (String med : commonMeds) {
+            Pattern commonPattern = Pattern.compile("\\b" + med + "\\b", Pattern.CASE_INSENSITIVE);
+            matcher = commonPattern.matcher(text);
+            if (matcher.find() && !names.contains(med)) {
+                names.add(med);
             }
         }
 
@@ -113,21 +145,28 @@ public class MedicationTextExtractor {
      */
     private Map<String, String> extractDosageInfo(String text) {
         Map<String, String> dosageMap = new HashMap<>();
+        text = text.toLowerCase();
 
         // Look for patterns like "X mg" or "X tablet"
         for (String unit : UNITS) {
             Pattern pattern = Pattern.compile("(\\d+(\\.\\d+)?)\\s*" + unit);
-            Matcher matcher = pattern.matcher(text.toLowerCase());
+            Matcher matcher = pattern.matcher(text);
 
             while (matcher.find()) {
-                // Try to find the associated medicine name (simple approach: check words before)
-                String beforeText = text.substring(0, matcher.start()).toLowerCase();
+                String dosage = matcher.group();
+
+                // Try to find the closest medication name before this dosage
+                String beforeText = text.substring(0, matcher.start());
                 String[] words = beforeText.split("\\s+");
 
                 if (words.length > 0) {
-                    String potentialMed = words[words.length - 1];
-                    if (potentialMed.length() >= 4) {
-                        dosageMap.put(potentialMed, matcher.group());
+                    // Look for closest word that could be a medication name
+                    for (int i = words.length - 1; i >= 0; i--) {
+                        String word = words[i].replaceAll("[^a-zA-Z]", "");
+                        if (word.length() >= 4) {
+                            dosageMap.put(word, dosage);
+                            break;
+                        }
                     }
                 }
             }
@@ -141,18 +180,29 @@ public class MedicationTextExtractor {
      */
     private Map<String, String> extractFrequencyInfo(String text) {
         Map<String, String> frequencyMap = new HashMap<>();
+        text = text.toLowerCase();
 
         for (String timeIndicator : TIME_INDICATORS) {
-            if (text.toLowerCase().contains(timeIndicator)) {
-                // Simple approach: find closest medication name
-                int index = text.toLowerCase().indexOf(timeIndicator);
-                String beforeText = text.substring(0, index).toLowerCase();
-                String[] words = beforeText.split("\\s+");
+            Pattern pattern = Pattern.compile("\\b" + timeIndicator +
+                    "\\b([a-z\\s]{0,20}(meals|food|water|day|night))?");
+            Matcher matcher = pattern.matcher(text);
+
+            while (matcher.find()) {
+                String frequency = matcher.group();
+
+                // Extract context (20 characters before)
+                int startPoint = Math.max(0, matcher.start() - 30);
+                String context = text.substring(startPoint, matcher.start());
+                String[] words = context.split("\\s+");
 
                 if (words.length > 0) {
-                    String potentialMed = words[words.length - 1];
-                    if (potentialMed.length() >= 4) {
-                        frequencyMap.put(potentialMed, timeIndicator);
+                    // Try to find a medication name in the context
+                    for (int i = words.length - 1; i >= 0; i--) {
+                        String word = words[i].replaceAll("[^a-zA-Z]", "");
+                        if (word.length() >= 4) {
+                            frequencyMap.put(word, frequency);
+                            break;
+                        }
                     }
                 }
             }
@@ -162,10 +212,87 @@ public class MedicationTextExtractor {
     }
 
     /**
-     * Validate medication name against database
+     * Validate medication against database
      */
-    private void validateMedicationName(String medName, MedicationRepository.MedicationCallback callback) {
-        repository.searchMedications(medName, callback);
+    private void validateMedication(String medName, Map<String, String> dosageInfo,
+                                    Map<String, String> frequencyInfo,
+                                    List<MedicationInfo> results, CountDownLatch latch) {
+
+        repository.searchMedications(medName, new MedicationRepository.MedicationCallback() {
+            @Override
+            public void onMedicationsLoaded(List<Medication> medications) {
+                if (!medications.isEmpty()) {
+                    Medication validMed = medications.get(0);
+
+                    // Get dosage and frequency for this medication
+                    String dosage = findBestMatch(medName, dosageInfo);
+                    String frequency = findBestMatch(medName, frequencyInfo);
+
+                    // Create medication info object with extracted data
+                    MedicationInfo info = new MedicationInfo(
+                            validMed.getName(),
+                            dosage,
+                            frequency
+                    );
+
+                    // Add to results
+                    synchronized(results) {
+                        results.add(info);
+                    }
+
+                    Log.d(TAG, "Validated medication: " + validMed.getName());
+                } else {
+                    // No validation from database, use as-is if we have dosage/frequency
+                    String dosage = findBestMatch(medName, dosageInfo);
+                    String frequency = findBestMatch(medName, frequencyInfo);
+
+                    if (!dosage.equals("Unknown dosage") || !frequency.equals("Unknown frequency")) {
+                        MedicationInfo info = new MedicationInfo(
+                                capitalizeFirstLetter(medName),
+                                dosage,
+                                frequency
+                        );
+
+                        synchronized(results) {
+                            results.add(info);
+                        }
+
+                        Log.d(TAG, "Added unvalidated medication with dosage/frequency: " + medName);
+                    }
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(TAG, "Error validating medication: " + e.getMessage());
+                latch.countDown();
+            }
+        });
+    }
+
+    private String findBestMatch(String medName, Map<String, String> infoMap) {
+        // Try exact match first
+        if (infoMap.containsKey(medName.toLowerCase())) {
+            return infoMap.get(medName.toLowerCase());
+        }
+
+        // Try partial matches
+        for (String key : infoMap.keySet()) {
+            if (key.toLowerCase().contains(medName.toLowerCase()) ||
+                    medName.toLowerCase().contains(key.toLowerCase())) {
+                return infoMap.get(key);
+            }
+        }
+
+        return medName.contains("dosage") ? "Unknown dosage" : "Unknown frequency";
+    }
+
+    private String capitalizeFirstLetter(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return text.substring(0, 1).toUpperCase() + text.substring(1).toLowerCase();
     }
 
     /**
@@ -173,43 +300,37 @@ public class MedicationTextExtractor {
      */
     public static class MedicationInfo {
         private String name;
-        private String genericName;
         private String extractedDosage;
         private String extractedFrequency;
+        private String genericName;
         private String standardDosage;
 
-        public MedicationInfo(String name, String genericName, String extractedDosage,
-                              String extractedFrequency, String standardDosage) {
+        public MedicationInfo(String name, String extractedDosage, String extractedFrequency) {
             this.name = name;
-            this.genericName = genericName;
             this.extractedDosage = extractedDosage;
             this.extractedFrequency = extractedFrequency;
-            this.standardDosage = standardDosage;
+            this.genericName = "";
+            this.standardDosage = "";
         }
 
-        // Getters and setters
+        // Getters
         public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-
-        public String getGenericName() { return genericName; }
-        public void setGenericName(String genericName) { this.genericName = genericName; }
-
         public String getExtractedDosage() { return extractedDosage; }
-        public void setExtractedDosage(String extractedDosage) { this.extractedDosage = extractedDosage; }
-
         public String getExtractedFrequency() { return extractedFrequency; }
-        public void setExtractedFrequency(String extractedFrequency) { this.extractedFrequency = extractedFrequency; }
-
+        public String getGenericName() { return genericName; }
         public String getStandardDosage() { return standardDosage; }
+
+        // Setters
+        public void setGenericName(String genericName) { this.genericName = genericName; }
         public void setStandardDosage(String standardDosage) { this.standardDosage = standardDosage; }
 
         @Override
         public String toString() {
             return "Medicine: " + name +
-                    "\nGeneric: " + genericName +
+                    "\nGeneric Name: " + genericName +
                     "\nDosage: " + extractedDosage +
-                    "\nFrequency: " + extractedFrequency +
-                    "\nStandard Dosage: " + standardDosage;
+                    "\nStandard Dosage: " + standardDosage +
+                    "\nFrequency: " + extractedFrequency;
         }
     }
 
