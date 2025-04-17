@@ -132,6 +132,7 @@ public class profile extends Fragment {
         });
 
         // Save button
+// Save button
         saveButton.setOnClickListener(v -> {
             String updatedName = userNameEditText.getText().toString().trim();
             String updatedEmail = userEmailEditText.getText().toString().trim();
@@ -144,6 +145,11 @@ public class profile extends Fragment {
 
             final String finalUpdatedPassword = updatedPassword;
 
+            // Show a loading toast to indicate the update is in progress
+            if (getActivity() != null) {
+                Toast.makeText(getActivity(), "Updating profile...", Toast.LENGTH_SHORT).show();
+            }
+
             // Validate inputs
             db.collection("users").document(userId)
                     .update("name", updatedName,
@@ -151,7 +157,13 @@ public class profile extends Fragment {
                             "age", updatedAge,
                             "password", finalUpdatedPassword)
                     .addOnSuccessListener(unused -> {
-                        Toast.makeText(getContext(), "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                        // Ensure we're using the activity context and showing a LONG duration toast
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                Toast.makeText(getActivity(), "Profile updated successfully!", Toast.LENGTH_LONG).show();
+                            });
+                        }
+
                         setEditable(false);
                         // Hide the save button and show the edit button
                         historyLayout.setVisibility(View.VISIBLE);
@@ -165,7 +177,11 @@ public class profile extends Fragment {
                         userPasswordEditText.setText("********");
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                Toast.makeText(getActivity(), "Failed to update: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
+                        }
                     });
         });
 
